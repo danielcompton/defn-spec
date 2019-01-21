@@ -94,5 +94,6 @@
                        :arglists (list 'quote arglists)
                        :schema schema-form)
                     ~@fn-body)]
+         ;; TODO: create an fdef that goes here.
          (utils/declare-class-schema! (utils/fn-schema-bearer ~name) ~schema-form)
          ret#))))
