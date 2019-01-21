@@ -2,7 +2,7 @@
   "Macros and macro helpers used in schema.core."
   (:require
     [clojure.string :as str]
-    [schema.utils :as utils]))
+    [co.deps.defn-spec.utils :as utils]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helpers used in schema.core.
@@ -223,38 +223,10 @@
                            (if rest-arg
                              (into metad-bind-syms ['& rest-sym])
                              metad-bind-syms)
-                           `(let [validate# ~(if (:always-validate (meta fn-name))
-                                               `true
-                                               `(if-cljs (deref ~'ufv__) (.get ~'ufv__)))]
-                              (when validate#
-                                (let [args# ~(if rest-arg
-                                               `(list* ~@bind-syms ~rest-sym)
-                                               bind-syms)]
-                                  (if schema.core/fn-validator
-                                    (schema.core/fn-validator :input
-                                                              '~fn-name
-                                                              ~input-schema-sym
-                                                              @~input-checker-sym
-                                                              args#)
-                                    (when-let [error# (@~input-checker-sym args#)]
-                                      (error! (utils/format* "Input to %s does not match schema: \n\n\t \033[0;33m  %s \033[0m \n\n"
-                                                             '~fn-name (pr-str error#))
-                                              {:schema ~input-schema-sym :value args# :error error#})))))
-                              (let [o# (loop ~(into (vec (interleave (map #(with-meta % {}) bind) bind-syms))
-                                                    (when rest-arg [rest-arg rest-sym]))
-                                         ~@(apply-prepost-conditions body))]
-                                (when validate#
-                                  (if schema.core/fn-validator
-                                    (schema.core/fn-validator :output
-                                                              '~fn-name
-                                                              ~output-schema-sym
-                                                              @~output-checker-sym
-                                                              o#)
-                                    (when-let [error# (@~output-checker-sym o#)]
-                                      (error! (utils/format* "Output of %s does not match schema: \n\n\t \033[0;33m  %s \033[0m \n\n"
-                                                             '~fn-name (pr-str error#))
-                                              {:schema ~output-schema-sym :value o# :error error#}))))
-                                o#))))
+                           `(let [o# (loop ~(into (vec (interleave (map #(with-meta % {}) bind) bind-syms))
+                                                  (when rest-arg [rest-arg rest-sym]))
+                                       ~@(apply-prepost-conditions body))]
+                              o#)))
                        (cons (into regular-args (when rest-arg ['& rest-arg]))
                              body))}))
 
@@ -275,8 +247,6 @@
         schema-bindings (map :schema-binding processed-arities)
         fn-forms (map :arity-form processed-arities)]
     {:outer-bindings (vec (concat
-                            (when compile-validation
-                              `[~(with-meta 'ufv__ {:tag 'java.util.concurrent.atomic.AtomicReference}) schema.utils/use-fn-validation])
                             [output-schema-sym output-schema]
                             (apply concat schema-bindings)
                             (mapcat :more-bindings processed-arities)))

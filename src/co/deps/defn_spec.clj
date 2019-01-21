@@ -1,7 +1,11 @@
 (ns co.deps.defn-spec
+  (:refer-clojure :exclude [defn])
   (:require [clojure.spec.alpha :as s]
+            [schema.core]
             [co.deps.defn-spec.macros :as macros]
-            [co.deps.defn-spec.utils :as utils]))
+            [co.deps.defn-spec.utils :as utils]
+            [orchestra.spec.test :as st]
+            ))
 
 ;; Defn
 ;; Look at what prismatic schema did, and gfredricks
@@ -21,7 +25,7 @@
 
 ;; As an fspec on the pre/post map
 
-{:pre  (fn [x])
+'{:pre  (fn [x])
  :post (fn [x])
  :fspec (s/fspec :args (s/cat :user :app/user)
                  :ret :app/user-friends)}
@@ -32,7 +36,7 @@
 
 
 (defmacro defn
-  "Like clojure.core/defn, except that schema-style typehints can be given on
+  "Like clojure.core/defn, except that spec typehints can be given on
    the argument symbols and on the function name (for the return value).
    You can call s/fn-schema on the defined function to get its schema back, or
    use with-fn-validation to enable runtime checking of function inputs and
@@ -92,8 +96,23 @@
                               (when doc (str "\n\n  " doc)))
                        :raw-arglists (list 'quote raw-arglists)
                        :arglists (list 'quote arglists)
+                       ;; TODO: remove this
                        :schema schema-form)
                     ~@fn-body)]
          ;; TODO: create an fdef that goes here.
-         (utils/declare-class-schema! (utils/fn-schema-bearer ~name) ~schema-form)
+         ;~(prn (meta name))
+         (s/fdef ~(with-meta name {})
+                 :ret ~(:schema (meta name)))
          ret#))))
+
+(defn my-fnx :- (s/keys :req [::a ::b]) []
+  5
+  10)
+
+(defn fn-args [bxy]
+  5
+  (+ 10 bxy))
+
+
+
+(st/instrument)
