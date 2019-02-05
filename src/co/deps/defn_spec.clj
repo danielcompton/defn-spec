@@ -83,7 +83,8 @@
   [& defn-args]
   (let [[name & more-defn-args] (macros/normalized-defn-args &env defn-args)
         {:keys [doc tag] :as standard-meta} (meta name)
-        {:keys [outer-bindings schema-form fn-body arglists raw-arglists]} (macros/process-fn- &env name more-defn-args)]
+        {:keys [outer-bindings schema-form fn-body arglists raw-arglists
+                processed-arities]} (macros/process-fn- &env name more-defn-args)]
     `(let ~outer-bindings
        (let [ret# (clojure.core/defn ~(with-meta name {})
                     ~(assoc (apply dissoc standard-meta (when (macros/primitive-sym? tag) [:tag]))
@@ -100,16 +101,16 @@
                        :schema schema-form)
                     ~@fn-body)]
          ;; TODO: create an fdef that goes here.
-         ;~(prn (meta name))
+         ;~(prn processed-arities)
          (s/fdef ~(with-meta name {})
                  :ret ~(:schema (meta name)))
          ret#))))
 
-(defn my-fnx :- (s/keys :req [::a ::b]) []
+#_(defn my-fnx :- (s/keys :req [::a ::b]) []
   5
   10)
 
-(defn fn-args [bxy]
+(defn fn-args [bxy :- String]
   5
   (+ 10 bxy))
 

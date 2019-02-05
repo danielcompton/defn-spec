@@ -203,12 +203,14 @@
   (when-let [bad-meta (seq (filter (or (meta bind) {}) [:tag :s? :s :schema]))]
     (throw (RuntimeException. (str "Meta not supported on bindings, put on fn name" (vec bad-meta)))))
   (let [original-arglist bind
+        ;; this returns symbols with metadata on them
         bind (with-meta (process-arrow-schematized-args env bind) bind-meta)
         [regular-args rest-arg] (split-rest-arg env bind)
         input-schema-sym (gensym "input-schema")
         input-checker-sym (gensym "input-checker")
         output-checker-sym (gensym "output-checker")
         compile-validation (compile-fn-validation? env fn-name)]
+    (prn "BIND" bind-meta)
     {:schema-binding [input-schema-sym (input-schema-form regular-args rest-arg)]
      :more-bindings  (when compile-validation
                        [input-checker-sym `(delay (schema.core/checker ~input-schema-sym))
@@ -255,7 +257,8 @@
      :schema-form    (if (= 1 (count processed-arities))
                        `(schema.core/->FnSchema ~output-schema-sym ~[(ffirst schema-bindings)])
                        `(schema.core/make-fn-schema ~output-schema-sym ~(mapv first schema-bindings)))
-     :fn-body        fn-forms}))
+     :fn-body        fn-forms
+     :processed-arities processed-arities}))
 
 (defn parse-arity-spec
   "Helper for schema.core/=>*."
