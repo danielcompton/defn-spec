@@ -55,8 +55,7 @@
    plus an optional explicit schema, and normalize the
    object to have a valid Clojure :tag plus a :schema field."
   [env imeta explicit-spec]
-  (let [{:keys [tag s s? spec]} (meta imeta)]
-    (assert! (not (or s s?)) "^{:s schema} style schemas are no longer supported.")
+  (let [{:keys [tag spec]} (meta imeta)]
     (assert! (< (count (remove nil? [spec explicit-spec])) 2)
              "Expected single schema, got meta %s, explicit %s" (meta imeta) explicit-spec)
     (let [spec (or explicit-spec spec tag `any?)]
