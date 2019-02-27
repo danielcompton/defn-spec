@@ -2,8 +2,7 @@
   (:refer-clojure :exclude [defn])
   (:require [clojure.spec.alpha :as s]
             [schema.core]
-            [co.deps.defn-spec.macros :as macros]
-            [orchestra.spec.test :as st]))
+            [co.deps.defn-spec.macros :as macros]))
 
 (defmacro defn
   "Like clojure.core/defn, except that spec typehints can be given on
@@ -56,27 +55,9 @@
                        ;; TODO: remove this
                        :spec schema-form)
                     ~@fn-body)]
-         ~(prn "ARGS" (map meta (first arglists)))
-         ~(prn "RET " (:spec (meta name)))
          (s/fdef ~(with-meta name {})
                  :ret ~(:spec (meta name))
-                 :args nil)
+                 :args (s/cat ~@(mapcat
+                                  #(list (keyword %) (:spec (meta %)))
+                                  (first arglists))))
          ret#))))
-
-#_(defn my-fnx :- (s/keys :req [::a ::b]) []
-  5
-  10)
-
-(defn fn-args [bxy :- integer?
-               zx]
-  5
-  (+ 10 bxy))
-
-
-
-(st/instrument)
-
-(comment
-  (s/describe (get @@#'clojure.spec.alpha/registry-ref `my-fnx))
-
-  )
