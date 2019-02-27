@@ -18,18 +18,6 @@
   [then else]
   (if (cljs-env? &env) then else))
 
-(defmacro try-catchall
-  "A cross-platform variant of try-catch that catches all exceptions.
-   Does not (yet) support finally, and does not need or want an exception class."
-  [& body]
-  (let [try-body (butlast body)
-        [catch sym & catch-body :as catch-form] (last body)]
-    (assert (= catch 'catch))
-    (assert (symbol? sym))
-    `(if-cljs
-       (try ~@try-body (~'catch js/Object ~sym ~@catch-body))
-       (try ~@try-body (~'catch Throwable ~sym ~@catch-body)))))
-
 (defmacro error!
   "Generate a cross-platform exception appropriate to the macroexpansion context"
   ([s]
@@ -42,24 +30,11 @@
         (throw (ex-info ~s ~m))
         (throw (clojure.lang.ExceptionInfo. ~(with-meta s `{:tag java.lang.String}) ~m))))))
 
-(defmacro safe-get
-  "Like get but throw an exception if not found.  A macro just to work around cljx function
-   placement restrictions. "
-  [m k]
-  `(let [m# ~m k# ~k]
-     (if-let [pair# (find m# k#)]
-       (val pair#)
-       (error! (utils/format* "Key %s not found in %s" k# m#)))))
-
 (defmacro assert!
   "Like assert, but throws a RuntimeException (in Clojure) and takes args to format."
   [form & format-args]
   `(when-not ~form
      (error! (utils/format* ~@format-args))))
-
-(defmacro validation-error [schema value expectation & [fail-explanation]]
-  `(schema.utils/error
-     (utils/make-ValidationError ~schema ~value (delay ~expectation) ~fail-explanation)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helpers for processing and normalizing element/argument schemas in s/defrecord and s/(de)fn
@@ -79,24 +54,24 @@
   "Take an object with optional metadata, which may include a :tag,
    plus an optional explicit schema, and normalize the
    object to have a valid Clojure :tag plus a :schema field."
-  [env imeta explicit-schema]
-  (let [{:keys [tag s s? schema]} (meta imeta)]
+  [env imeta explicit-spec]
+  (let [{:keys [tag s s? spec]} (meta imeta)]
     (assert! (not (or s s?)) "^{:s schema} style schemas are no longer supported.")
-    (assert! (< (count (remove nil? [schema explicit-schema])) 2)
-             "Expected single schema, got meta %s, explicit %s" (meta imeta) explicit-schema)
-    (let [schema (or explicit-schema schema tag `schema.core/Any)]
+    (assert! (< (count (remove nil? [spec explicit-spec])) 2)
+             "Expected single schema, got meta %s, explicit %s" (meta imeta) explicit-spec)
+    (let [spec (or explicit-spec spec tag `any?)]
       (with-meta imeta
                  (-> (or (meta imeta) {})
                      (dissoc :tag)
-                     (utils/assoc-when :schema schema
-                                       :tag (let [t (or tag schema)]
+                     (utils/assoc-when :spec spec
+                                       :tag (let [t (or tag spec)]
                                               (when (valid-tag? env t)
                                                 t))))))))
 
 (defn extract-schema-form
   "Pull out the schema stored on a thing.  Public only because of its use in a public macro."
   [symbol]
-  (let [s (:schema (meta symbol))]
+  (let [s (:spec (meta symbol))]
     (assert! s "%s is missing a schema" symbol)
     s))
 
@@ -200,7 +175,7 @@
    every time we do the validation."
   [env fn-name output-schema-sym bind-meta [bind & body]]
   (assert! (vector? bind) "Got non-vector binding form %s" bind)
-  (when-let [bad-meta (seq (filter (or (meta bind) {}) [:tag :s? :s :schema]))]
+  (when-let [bad-meta (seq (filter (or (meta bind) {}) [:tag :s? :s :spec]))]
     (throw (RuntimeException. (str "Meta not supported on bindings, put on fn name" (vec bad-meta)))))
   (let [original-arglist bind
         ;; this returns symbols with metadata on them
@@ -260,71 +235,6 @@
      :fn-body        fn-forms
      :processed-arities processed-arities}))
 
-(defn parse-arity-spec
-  "Helper for schema.core/=>*."
-  [spec]
-  (assert! (vector? spec) "An arity spec must be a vector")
-  (let [[init more] ((juxt take-while drop-while) #(not= '& %) spec)
-        fixed (mapv (fn [i s] `(schema.core/one ~s '~(symbol (str "arg" i)))) (range) init)]
-    (if (empty? more)
-      fixed
-      (do (assert! (and (= (count more) 2) (vector? (second more)))
-                   "An arity with & must be followed by a single sequence schema")
-          (into fixed (second more))))))
-
-(defn emit-defrecord
-  [defrecord-constructor-sym env name field-schema & more-args]
-  (let [[extra-key-schema? more-args] (maybe-split-first map? more-args)
-        [extra-validator-fn? more-args] (maybe-split-first (complement symbol?) more-args)
-        field-schema (process-arrow-schematized-args env field-schema)]
-    `(do
-       (let [bad-keys# (seq (filter #(schema.core/required-key? %)
-                                    (keys ~extra-key-schema?)))]
-         (assert! (not bad-keys#) "extra-key-schema? can not contain required keys: %s"
-                  (vec bad-keys#)))
-       ~(when extra-validator-fn?
-          `(assert! (fn? ~extra-validator-fn?) "Extra-validator-fn? not a fn: %s"
-                    (type ~extra-validator-fn?)))
-       (~defrecord-constructor-sym ~name ~field-schema ~@more-args)
-       (utils/declare-class-schema!
-         ~name
-         (utils/assoc-when
-           (schema.core/record
-             ~name
-             (merge ~(into {}
-                           (for [k field-schema]
-                             [(keyword (clojure.core/name k))
-                              (do (assert! (symbol? k)
-                                           "Non-symbol in record binding form: %s" k)
-                                  (extract-schema-form k))]))
-                    ~extra-key-schema?)
-             ~(symbol (str 'map-> name)))
-           :extra-validator-fn ~extra-validator-fn?))
-       ~(let [map-sym (gensym "m")]
-          `(if-cljs
-             nil
-             (defn ~(symbol (str 'map-> name))
-               ~(str "Factory function for class " name ", taking a map of keywords to field values, but not much\n"
-                     " slower than ->x like the clojure.core version.\n"
-                     " (performance is fixed in Clojure 1.7, so this should eventually be removed.)")
-               [~map-sym]
-               (let [base# (new ~(symbol (str name))
-                                ~@(map (fn [s] `(get ~map-sym ~(keyword s))) field-schema))
-                     remaining# (dissoc ~map-sym ~@(map keyword field-schema))]
-                 (if (seq remaining#)
-                   (merge base# remaining#)
-                   base#)))))
-       ~(let [map-sym (gensym "m")]
-          `(defn ~(symbol (str 'strict-map-> name))
-             ~(str "Factory function for class " name ", taking a map of keywords to field values.  All"
-                   " keys are required, and no extra keys are allowed.  Even faster than map->")
-             [~map-sym & [drop-extra-keys?#]]
-             (when-not (or drop-extra-keys?# (= (count ~map-sym) ~(count field-schema)))
-               (error! (utils/format* "Wrong number of keys: expected %s, got %s"
-                                      (sort ~(mapv keyword field-schema)) (sort (keys ~map-sym)))))
-             (new ~(symbol (str name))
-                  ~@(map (fn [s] `(safe-get ~map-sym ~(keyword s))) field-schema)))))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public: helpers for schematized functions
 
@@ -342,10 +252,3 @@
                      (or maybe-attr-map {})
                      (when maybe-docstring {:doc maybe-docstring}))
           macro-args)))
-
-(defn set-compile-fn-validation!
-  "Globally turn on or off function validation from being compiled into s/fn and s/defn.
-   Enabled by default.
-   See (doc compile-fn-validation?) for all conditions which control fn validation compilation"
-  [on?]
-  (reset! *compile-fn-validation* on?))
