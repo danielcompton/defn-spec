@@ -185,7 +185,6 @@
         input-checker-sym (gensym "input-checker")
         output-checker-sym (gensym "output-checker")
         compile-validation (compile-fn-validation? env fn-name)]
-    (prn "BIND" bind-meta)
     {:schema-binding [input-schema-sym (input-schema-form regular-args rest-arg)]
      :more-bindings  (when compile-validation
                        [input-checker-sym `(delay (schema.core/checker ~input-schema-sym))

@@ -5,57 +5,15 @@
             [co.deps.defn-spec.macros :as macros]
             [orchestra.spec.test :as st]))
 
-;; Defn
-;; Look at what prismatic schema did, and gfredricks
-;; Can provide specs in several places
-
-;; As metadata on the function
-
-'[user :- :app/user]
-;; ret value :-
-
-;; As part of the pre/post map
-
-{:pre  (fn [x])
- :post (fn [x])
- :args (s/cat :user :app/user)
- :ret  :app/user-friends}
-
-;; As an fspec on the pre/post map
-
-'{:pre  (fn [x])
- :post (fn [x])
- :fspec (s/fspec :args (s/cat :user :app/user)
-                 :ret :app/user-friends)}
-
-
-;; Provide fn and defn
-;; Allows speccing anonymous functions
-
-
 (defmacro defn
   "Like clojure.core/defn, except that spec typehints can be given on
    the argument symbols and on the function name (for the return value).
-   You can call s/fn-schema on the defined function to get its schema back, or
-   use with-fn-validation to enable runtime checking of function inputs and
-   outputs.
-   (s/defn foo :- s/Num
-    [x :- s/Int
-     y :- s/Num]
+
+   (s/defn foo :- number?
+    [x :- integer?
+     y :- number?]
     (* x y))
-   (s/fn-schema foo)
-   ==> (=> java.lang.Number Int java.lang.Number)
-   (s/with-fn-validation (foo 1 2))
-   ==> 2
-   (s/with-fn-validation (foo 1.5 2))
-   ==> Input to foo does not match schema: [(named (not (integer? 1.5)) x) nil]
-   See (doc schema.core) for details of the :- syntax for arguments and return
-   schemas.
-   The overhead for checking if run-time validation should be used is very
-   small -- about 5% of a very small fn call.  On top of that, actual
-   validation costs what it costs.
-   You can also turn on validation unconditionally for this fn only by
-   putting ^:always-validate metadata on the fn name.
+
    Gotchas and limitations:
     - The output schema always goes on the fn name, not the arg vector. This
       means that all arities must share the same output schema. Schema will
