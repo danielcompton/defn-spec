@@ -3,9 +3,7 @@
   (:require [clojure.spec.alpha :as s]
             [schema.core]
             [co.deps.defn-spec.macros :as macros]
-            [co.deps.defn-spec.utils :as utils]
-            [orchestra.spec.test :as st]
-            ))
+            [orchestra.spec.test :as st]))
 
 ;; Defn
 ;; Look at what prismatic schema did, and gfredricks
@@ -98,22 +96,29 @@
                        :raw-arglists (list 'quote raw-arglists)
                        :arglists (list 'quote arglists)
                        ;; TODO: remove this
-                       :schema schema-form)
+                       :spec schema-form)
                     ~@fn-body)]
-         ;; TODO: create an fdef that goes here.
-         ;~(prn processed-arities)
+         ~(prn "ARGS" (map meta (first arglists)))
+         ~(prn "RET " (:spec (meta name)))
          (s/fdef ~(with-meta name {})
-                 :ret ~(:schema (meta name)))
+                 :ret ~(:spec (meta name))
+                 :args nil)
          ret#))))
 
 #_(defn my-fnx :- (s/keys :req [::a ::b]) []
   5
   10)
 
-(defn fn-args [bxy :- String]
+(defn fn-args [bxy :- integer?
+               zx]
   5
   (+ 10 bxy))
 
 
 
 (st/instrument)
+
+(comment
+  (s/describe (get @@#'clojure.spec.alpha/registry-ref `my-fnx))
+
+  )
