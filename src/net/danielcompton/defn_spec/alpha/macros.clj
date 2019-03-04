@@ -1,8 +1,8 @@
-(ns co.deps.defn-spec.macros
+(ns net.danielcompton.defn-spec.alpha.macros
   "Macros and macro helpers used in schema.core."
   (:require
     [clojure.string :as str]
-    [co.deps.defn-spec.utils :as utils]))
+    [net.danielcompton.defn-spec.alpha.utils :as utils]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Helpers used in schema.core.

@@ -51,7 +51,6 @@ Just defines spec fdefs, doesn't force validation, need to define it separately.
 
 Currently doesn't do multiple arity functions
 
-;; TODO: move to spec.alpha ns
 
 ## License
 

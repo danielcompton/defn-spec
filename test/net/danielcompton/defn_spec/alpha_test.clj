@@ -1,7 +1,7 @@
-(ns co.deps.defn-spec-test
+(ns net.danielcompton.defn-spec.alpha-test
   (:refer-clojure :exclude [defn])
   (:require [clojure.test :refer :all]
-            [co.deps.defn-spec :as ds]
+            [net.danielcompton.defn-spec.alpha :as ds]
             [orchestra.spec.test :as st]
             [clojure.spec.alpha :as s])
   (:import (clojure.lang ExceptionInfo)))
