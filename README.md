@@ -83,6 +83,7 @@ Like all things in life, defn-spec has benefits and tradeoffs:
 * `& rest` and `& [a b]` destructuring are not yet supported. [#3](https://github.com/danielcompton/defn-spec/issues/3), [#4](https://github.com/danielcompton/defn-spec/issues/3)
 * `:fn` specs are not supported yet, as I'm not sure where to put the `:fn` spec yet. [#6](https://github.com/danielcompton/defn-spec/issues/6)
 * ClojureScript is not supported yet. [#7](https://github.com/danielcompton/defn-spec/issues/7)
+* Using an attr-map after the function definition is not supported. I've never seen this used in the wild, and didn't even know this was a thing until investigating the `defn` macro.
 
 ## Stability
 
