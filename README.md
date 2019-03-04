@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/danielcompton/defn-spec.svg?style=svg)](https://circleci.com/gh/danielcompton/defn-spec)
 
-defn-spec lets you create Clojure Specs inline with your `defn`, rather than having to write a separate `fdef` and keep it synchronized with the function definition. The syntax (and implementation) has been borrowed from [Schema](https://github.com/plumatic/schema), so if you've used that before, this should be very familiar.
+defn-spec lets you create Clojure Specs inline with your `defn`. This is faster and more concise than writing a separate `fdef` and keeping it synchronized with the function definition. The syntax (and implementation) has been borrowed from [Schema](https://github.com/plumatic/schema), so if you've used that before, this should be very familiar.
 
 Instead of writing your spec separately:
 
