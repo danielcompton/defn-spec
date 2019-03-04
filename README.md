@@ -4,14 +4,29 @@
 
 defn-spec lets you create Clojure Specs inline with your `defn`. The syntax (and implementation) has been borrowed from [Schema](https://github.com/plumatic/schema), so if you've used that before, this should be very familiar.
 
-Instead of writing your `fdef` separately from your `defn`:
+You can define your argument and return specs inline with your `defn`:
 
 ```clj
+(ns my.ns
+  (:require [net.danielcompton.defn-spec.alpha :as ds]
+            [clojure.spec.alpha :as s]
+            ; ...
+            ))
+
 ;; Predicate definitions elided for brevity
 (s/def ::instant instant?)
 (s/def ::zone-id zone-id?)
 (s/def ::zoned-date-time zoned-date-time?)
 
+(ds/defn to-zoned-dt :- ::zoned-date-time
+  [instant :- ::instant
+   zone-id :- ::zone-id]
+  (ZonedDateTime/ofInstant instant zone-id))
+```
+
+Instead of writing your `fdef` separately from your `defn`:
+
+```clj
 (defn to-zoned-dt
   [instant zone-id]
   (ZonedDateTime/ofInstant instant zone-id))
@@ -19,20 +34,6 @@ Instead of writing your `fdef` separately from your `defn`:
 (s/fdef to-zoned-dt
         :args (s/cat :instant ::instant :zone-id ::zone-id)
         :ret ::zoned-date-time)
-```
-
-You can define your argument and return specs inline with your `defn`:
-
-```clj
-(ns my.ns
-  (:require [net.danielcompton.defn-spec.alpha :as ds]
-            ; ...
-            ))
-
-(ds/defn-spec to-zoned-dt :- ::zoned-date-time
-  [instant :- ::instant
-   zone-id :- ::zone-id]
-  (ZonedDateTime/ofInstant instant zone-id))
 ```
 
 ## Usage
