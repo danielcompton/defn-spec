@@ -6,4 +6,4 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [prismatic/schema "1.1.10"]
                  [org.clojure/clojurescript "1.9.562"]]
-  :profiles {:dev {:dependencies [[orchestra "2018.12.06-2"]]}})
+  :profiles {:dev {:dependencies [[orchestra "2019.02.06-1"]]}})
