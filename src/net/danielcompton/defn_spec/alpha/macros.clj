@@ -2,6 +2,7 @@
   "Macros and macro helpers used in schema.core."
   (:require
     [clojure.string :as str]
+    [schema.core]
     [net.danielcompton.defn-spec.alpha.utils :as utils]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
