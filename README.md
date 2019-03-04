@@ -51,6 +51,13 @@ Just defines spec fdefs, doesn't force validation, need to define it separately.
 
 Currently doesn't do multiple arity functions
 
+## Cursive integration
+
+You can tell Cursive to resolve defn-spec's `defn` macro like the schema `defn` macro.
+
+
+
+To get Cursive to understand the `defn` macr
 
 ## License
 
