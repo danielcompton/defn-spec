@@ -2,9 +2,9 @@
 
 [![CircleCI](https://circleci.com/gh/danielcompton/defn-spec.svg?style=svg)](https://circleci.com/gh/danielcompton/defn-spec)
 
-defn-spec lets you create Clojure Specs inline with your `defn`. This is faster and more concise than writing a separate `fdef` and keeping it synchronized with the function definition. The syntax (and implementation) has been borrowed from [Schema](https://github.com/plumatic/schema), so if you've used that before, this should be very familiar.
+defn-spec lets you create Clojure Specs inline with your `defn`. The syntax (and implementation) has been borrowed from [Schema](https://github.com/plumatic/schema), so if you've used that before, this should be very familiar.
 
-Instead of writing your spec separately:
+Instead of writing your `fdef` separately from your `defn`:
 
 ```clj
 ;; Predicate definitions elided for brevity
@@ -21,7 +21,7 @@ Instead of writing your spec separately:
         :ret ::zoned-date-time)
 ```
 
-You can define your argument and return specs inline:
+You can define your argument and return specs inline with your `defn`:
 
 ```clj
 (ns my.ns
@@ -37,7 +37,7 @@ You can define your argument and return specs inline:
 
 ## Usage
 
-The basic syntax is the same as `clojure.core/defn`, but you can optionally add 'spec hints' with `:-` to any of the arguments and the return value. Any valid spec can be used, e.g. functions, sets, registered specs.
+The basic syntax is the same as `clojure.core/defn`, but you can optionally add 'spec hints' with `:-` to any of the arguments and the return value. Any valid spec can be used, e.g. functions, sets, registered spec identifiers.
 
 ```clj
 (ds/defn my-fn-name :- <:ret spec>
@@ -67,13 +67,14 @@ Like all things in life, defn-spec has benefits and tradeoffs:
 
 **Tradeoffs**
 
-* For some specs, particularly with complex macros, it may be simpler to define the `fdef` separately for full control of the `s/cat` form.
+* For some specs, particularly complex `:args` specs with many branches, it may be simpler to define the `fdef` separately. `defn-spec` is designed for the 80-90% of Clojure functions that have simple argument lists and return types.
 * Making it easier to change specs means that it is easier to accidentally break your callers. If your `fdef` is defined separately, it forces you to think more about growing the spec.
 
 ## Implementation notes
 
+* defn-spec uses your `:ret` spec as-is, but constructs an `:args` spec for you based on the function's argument names and the 'spec hints' that you provide.
 * defn-spec should preserve all metadata, docstrings, and type hints in the same way that Clojure's `defn` does. If you spot anything that isn't being retained, this is a bug, let me know!
-* If you use the `ds/defn` macro, but don't define any 'spec hints' then no `fdef` spec is defined.
+* If you use the `ds/defn` macro, but don't define any 'spec hints' for the arguments or return value then no `fdef` spec is defined.
 * When expanding the `ds/defn` macro, the `fdef` is defined immediately after the `clojure.core/defn`. If you declare fdefs after this point, they will overwrite the defn-spec `fdef`. You cannot merge 'spec hints' defined on a function and other spec definitions in a standalone `fdef`.
 * Unlike schema, defn-spec doesn't control when/if function specs are checked. I recommend using [orchestra](https://github.com/jeaye/orchestra) in development to instrument the `:args`, `:fn`, and `:ret` specs for your `fdef`'s.
 
@@ -87,11 +88,11 @@ Like all things in life, defn-spec has benefits and tradeoffs:
 
 ## Stability
 
-This library is currently in alpha preview and is soliciting feedback from interested parties before publishing an official release. In the meantime, you can use a SNAPSHOT build at `[TODO]`.
+This library is currently in alpha preview and is soliciting feedback on functionality and syntax from interested parties before publishing an official release. In the meantime, you can use a SNAPSHOT build at `[TODO]`.
 
 defn-spec follows clojure.spec.alpha. When `clojure.spec.alpha2` is released, the plan is to publish a new artifact ID and set of `alpha2` namespaces, so you can use both versions side-by-side.
 
-Long-term I would like `defn-spec` to be so stable that it is safe to include `defn-spec` as a library dependency. While I strongly want to keep source compatibility, I can't guarantee this in the short-term, so I would recommend only using this in applications or libraries where you control the consumers. There have also been rumblings that eventually there may be something similar to this built into Clojure's core.
+Long-term I would like `defn-spec` to be so stable that it is safe to include as a library dependency. While I strongly want to keep source compatibility, I can't guarantee this in the short-term. Until this warning is removed I would recommend only using this in applications or libraries where you control the consumers. There have also been rumblings that eventually there may be something similar to this built into Clojure's core defn macro.
 
 ## Cursive integration
 
