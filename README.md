@@ -48,7 +48,11 @@ The basic syntax is the same as `clojure.core/defn`, but you can optionally add 
    )
 ```
 
-The 'spec hints' are used to define a matching `fdef` for your function.
+## Motivation
+
+I've been using Clojure spec for a while, but I found that I often resisted writing specs for functions. This was mostly because I didn't want to have to copy the function name again in the `fdef`, then copy the names of the arguments into the `s/cat`, and then keep the two synchronized as the function changed over time. It's not a huge deal, but in my experience it was enough to deter me from writing specs while I was heavily working on an area of code. I created defn-spec to increase the locality of the spec definitions, and to reduce the activation energy to start adding specs to your codebase.
+
+This is similar to Orchestra's [defn-spec](https://github.com/jeaye/orchestra#defn-spec) macro, but allows for optionally only speccing part of the function, and matches the well-known Schema defn syntax. Try them both out though, and see which one works best for you.
 
 ## Benefits and tradeoffs
 
@@ -57,6 +61,7 @@ Like all things in life, defn-spec has benefits and tradeoffs:
 **Benefits**
 
 * Makes it easy to incrementally spec your functions. It lowers the activation energy needed to add a spec, perhaps just for a single arg or return value.
+* Makes it easier to see more code on one screen.
 * Makes it harder for your specs to get out of sync with the function definition, as they are linked together.
 * Avoids repeating all argument names in the `s/cat` form.
 
@@ -85,7 +90,7 @@ This library is currently in alpha preview and is soliciting feedback from inter
 
 defn-spec follows clojure.spec.alpha. When `clojure.spec.alpha2` is released, the plan is to publish a new artifact ID and set of `alpha2` namespaces, so you can use both versions side-by-side.
 
-Long-term I would like `defn-spec` to be so stable that it is safe to include `defn-spec` as a library dependency. While I strongly want to keep source compatibility, I can't guarantee this in the short-term, so I would recommend only using this in applications or libraries where you control the consumers. 
+Long-term I would like `defn-spec` to be so stable that it is safe to include `defn-spec` as a library dependency. While I strongly want to keep source compatibility, I can't guarantee this in the short-term, so I would recommend only using this in applications or libraries where you control the consumers. There have also been rumblings that eventually there may be something similar to this built into Clojure's core.
 
 ## Cursive integration
 
