@@ -1,6 +1,6 @@
-(defproject co.deps/defn-spec "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+(defproject net.danielcompton/defn-spec "0.1.0-SNAPSHOT"
+  :description "Create specs for your functions inline with your defn's"
+  :url "https://github.com/danielcompton/defn-spec"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.10.0"]
