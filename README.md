@@ -51,7 +51,7 @@ The basic syntax is the same as `clojure.core/defn`, but you can optionally add 
 
 ## Motivation
 
-I've been using Clojure spec for a while, but I found that I often resisted writing specs for functions. This was mostly because I didn't want to have to copy the function name again in the `fdef`, then copy the names of the arguments into the `s/cat`, and then keep the two synchronized as the function changed over time. It's not a huge deal, but in my experience it was enough to deter me from writing specs while I was heavily working on an area of code. I created defn-spec to increase the locality of the spec definitions, and to reduce the activation energy to start adding specs to your codebase.
+I've been using Clojure spec for a while, but I found that I often resisted writing specs for functions. This was mostly because I didn't want to have to duplicate a bunch of information into the `fdef`. It's not a huge deal, but in my experience it was enough to deter me from writing specs while I was heavily working on an area of code. I created defn-spec to increase the locality of the spec definitions, and to reduce the activation energy to start adding specs to your codebase.
 
 This is similar to Orchestra's [defn-spec](https://github.com/jeaye/orchestra#defn-spec) macro, but allows for optionally only speccing part of the function, and matches the well-known Schema defn syntax. Try them both out though, and see which one works best for you.
 
@@ -82,7 +82,7 @@ Like all things in life, defn-spec has benefits and tradeoffs:
 ## Limitations
 
 * Multiple arity functions are not yet supported. [#2](https://github.com/danielcompton/defn-spec/issues/2)
-* `& rest` and `& [a b]` destructuring are not yet supported. [#3](https://github.com/danielcompton/defn-spec/issues/3), [#4](https://github.com/danielcompton/defn-spec/issues/3)
+* `& rest`, `& [a b]`, and `:keys` destructuring are not yet supported. [#3](https://github.com/danielcompton/defn-spec/issues/3), [#4](https://github.com/danielcompton/defn-spec/issues/3), [#10](https://github.com/danielcompton/defn-spec/issues/10)
 * `:fn` specs are not supported yet, as I'm not sure where to put the `:fn` spec yet. [#6](https://github.com/danielcompton/defn-spec/issues/6)
 * ClojureScript is not supported yet. [#7](https://github.com/danielcompton/defn-spec/issues/7)
 * Using an attr-map after the function definition is not supported. I've never seen this used in the wild, and didn't even know this was a thing until investigating the `defn` macro.
