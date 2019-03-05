@@ -1,5 +1,4 @@
 (ns net.danielcompton.defn-spec.alpha-test
-  (:refer-clojure :exclude [defn])
   (:require [clojure.test :refer :all]
             [net.danielcompton.defn-spec.alpha :as ds]
             [orchestra.spec.test :as st]
@@ -11,6 +10,9 @@
                 (st/unstrument)
                 (st/instrument)
                 (f)))
+
+(defn get-spec [p]
+  (get @@#'clojure.spec.alpha/registry-ref p))
 
 (s/def ::int int?)
 
@@ -58,6 +60,17 @@
   (is (= 5 (args-ret 5)))
   (is (thrown? ExceptionInfo
                (args-ret-broken 5))))
+
+(deftest spec-forms-test
+  (is (= (s/describe (get-spec `args-ret))
+         '(fspec :args (cat :x ::int) :ret int? :fn nil)))
+
+  ;; TODO: shouldn't define any :args spec if none is provided, #1
+  #_(is (= (s/describe (get-spec `ret-spec))
+         '(fspec :args nil :ret ::int :fn nil)))
+
+  (is (= (s/describe (get-spec `arg-2))
+         '(fspec :args (cat :x int? :y any?) :ret any? :fn nil))))
 
 (ds/defn multi-arity
   ([]
@@ -127,8 +140,30 @@
 ;                 (keys-destructuring-named {:int 5 :foo 5}))))
 ;  )
 
+
+(clojure.core/defn standard-defn [x]
+  nil)
+
+(ds/defn no-spec-ds-defn [x]
+  nil)
+
+(ds/defn only-arg [x :- ::int]
+  x)
+
+(ds/defn only-ret :- ::int [x]
+  x)
+
+(deftest partial-spec
+  (testing "standard defn's don't register specs"
+    (is (nil? (get-spec `standard-defn))))
+
+  (testing "if no spec hints are provided, no function spec is defined"
+    ; TODO: broken, see #1
+  #_  (is (nil? (s/describe (get-spec `no-spec-ds-defn))))))
+
 (comment
   (s/describe (get @@#'clojure.spec.alpha/registry-ref `arg-1-spec))
+
 
   )
 
