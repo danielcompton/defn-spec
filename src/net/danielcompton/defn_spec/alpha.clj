@@ -50,9 +50,12 @@
                        ;; TODO: remove this
                        :spec schema-form)
                     ~@fn-body)]
-         (s/fdef ~(with-meta name {})
-                 :ret ~(:spec (meta name))
-                 :args (s/cat ~@(mapcat
-                                  #(list (keyword %) (:spec (meta %)))
-                                  (first arglists))))
+         ;; Only define an fdef if there are specs for the args or return value.
+         (when (or ~(:spec? (meta name))
+                   ~(some true? (map #(:spec? (meta %)) (first arglists))))
+           (s/fdef ~(with-meta name {})
+                   :ret ~(:spec (meta name))
+                   :args (s/cat ~@(mapcat
+                                    #(list (keyword %) (:spec (meta %)))
+                                    (first arglists)))))
          ret#))))

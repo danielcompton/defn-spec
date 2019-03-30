@@ -14,6 +14,9 @@
 (defn get-spec [p]
   (get @@#'clojure.spec.alpha/registry-ref p))
 
+(defn maybe-describe [p]
+  (some-> p get-spec s/describe))
+
 (s/def ::int int?)
 
 (ds/defn arg-1-fn [x :- int?]
@@ -62,14 +65,14 @@
                (args-ret-broken 5))))
 
 (deftest spec-forms-test
-  (is (= (s/describe (get-spec `args-ret))
+  (is (= (maybe-describe `args-ret)
          '(fspec :args (cat :x ::int) :ret int? :fn nil)))
 
   ;; TODO: shouldn't define any :args spec if none is provided, #1
-  #_(is (= (s/describe (get-spec `ret-spec))
+  #_(is (= (maybe-describe `ret-spec)
          '(fspec :args nil :ret ::int :fn nil)))
 
-  (is (= (s/describe (get-spec `arg-2))
+  (is (= (maybe-describe `arg-2)
          '(fspec :args (cat :x int? :y any?) :ret any? :fn nil))))
 
 (ds/defn multi-arity
@@ -150,6 +153,9 @@
 (ds/defn only-arg [x :- ::int]
   x)
 
+(ds/defn several-args-1-specced [y x :- ::int]
+  x)
+
 (ds/defn only-ret :- ::int [x]
   x)
 
@@ -158,8 +164,12 @@
     (is (nil? (get-spec `standard-defn))))
 
   (testing "if no spec hints are provided, no function spec is defined"
-    ; TODO: broken, see #1
-  #_  (is (nil? (s/describe (get-spec `no-spec-ds-defn))))))
+    (is (nil? (get-spec `no-spec-ds-defn))))
+
+  (testing "if some spec hints are provided, a function spec is defined"
+    (is (some? (get-spec `only-arg)))
+    (is (some? (get-spec `several-args-1-specced)))
+    (is (some? (get-spec `only-ret)))))
 
 (comment
   (s/describe (get @@#'clojure.spec.alpha/registry-ref `arg-1-spec))

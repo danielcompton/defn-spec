@@ -59,11 +59,17 @@
   (let [{:keys [tag spec]} (meta imeta)]
     (assert! (< (count (remove nil? [spec explicit-spec])) 2)
              "Expected single schema, got meta %s, explicit %s" (meta imeta) explicit-spec)
-    (let [spec (or explicit-spec spec tag `any?)]
+    ;; It is useful to be able to differentiate between an any? symbol being attached as a spec
+    ;; and it being defaulted to. Other parts of this parsing code rely on there always being
+    ;; _a_ spec, so for now we carry around both bits of information. Perhaps as the code gets
+    ;; further converted from it's schema roots this will change.
+    (let [spec? (boolean (or explicit-spec spec tag))
+          spec (or explicit-spec spec tag `any?)]
       (with-meta imeta
                  (-> (or (meta imeta) {})
                      (dissoc :tag)
                      (utils/assoc-when :spec spec
+                                       :spec? spec?
                                        :tag (let [t (or tag spec)]
                                               (when (valid-tag? env t)
                                                 t))))))))
