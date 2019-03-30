@@ -76,7 +76,7 @@ Like all things in life, defn-spec has benefits and tradeoffs:
 * defn-spec uses your `:ret` spec as-is, but constructs an `:args` spec for you based on the function's argument names and the 'spec hints' that you provide.
 * defn-spec should preserve all metadata, docstrings, and type hints in the same way that Clojure's `defn` does. If you spot anything that isn't being retained, this is a bug, let me know!
 * If you use the `ds/defn` macro, but don't define any 'spec hints' for the arguments or return value then no `fdef` spec is defined.
-* When expanding the `ds/defn` macro, the `fdef` is defined immediately before the `clojure.core/defn`. If you declare fdefs after this point, they will overwrite the defn-spec `fdef`. You cannot merge 'spec hints' defined on a function and other spec definitions in a standalone `fdef`.
+* When expanding the `ds/defn` macro, the `fdef` is defined immediately after the `clojure.core/defn`. If you declare fdefs after this point, they will overwrite the defn-spec `fdef`. You cannot merge 'spec hints' defined on a function and other spec definitions in a standalone `fdef`.
 * Unlike schema, defn-spec doesn't control when/if function specs are checked. I recommend using [orchestra](https://github.com/jeaye/orchestra) in development to instrument the `:args`, `:fn`, and `:ret` specs for your `fdef`'s.
 
 ## Limitations
