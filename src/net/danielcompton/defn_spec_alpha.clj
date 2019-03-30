@@ -1,7 +1,7 @@
-(ns net.danielcompton.defn-spec.alpha
+(ns net.danielcompton.defn-spec-alpha
   (:refer-clojure :exclude [defn])
   (:require [clojure.spec.alpha :as s]
-            [net.danielcompton.defn-spec.alpha.macros :as macros]))
+            [net.danielcompton.defn-spec-alpha.macros :as macros]))
 
 (defmacro defn
   "Like clojure.core/defn, except that spec typehints can be given on

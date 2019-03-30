@@ -8,7 +8,7 @@ Write a stub function using the defn-spec macro:
 
 ```clj
 (ns my.ns
-  (:require [net.danielcompton.defn-spec.alpha :as ds]
+  (:require [net.danielcompton.defn-spec-alpha :as ds]
             ; ...
             ))
 

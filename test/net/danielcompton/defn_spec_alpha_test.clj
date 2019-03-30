@@ -1,6 +1,6 @@
-(ns net.danielcompton.defn-spec.alpha-test
+(ns net.danielcompton.defn-spec-alpha-test
   (:require [clojure.test :refer :all]
-            [net.danielcompton.defn-spec.alpha :as ds]
+            [net.danielcompton.defn-spec-alpha :as ds]
             [orchestra.spec.test :as st]
             [clojure.spec.alpha :as s])
   (:import (clojure.lang ExceptionInfo)))

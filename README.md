@@ -8,7 +8,7 @@ You can define your argument and return specs inline with your `defn`:
 
 ```clj
 (ns my.ns
-  (:require [net.danielcompton.defn-spec.alpha :as ds]
+  (:require [net.danielcompton.defn-spec-alpha :as ds]
             [clojure.spec.alpha :as s]
             ; ...
             ))

@@ -1,4 +1,4 @@
-(ns net.danielcompton.defn-spec.alpha.utils
+(ns net.danielcompton.defn-spec-alpha.utils
   "Private utilities used in schema implementation."
   (:refer-clojure :exclude [record?])
   #?(:clj
