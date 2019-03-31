@@ -1,4 +1,4 @@
-(defproject net.danielcompton/defn-spec-alpha "0.1.0"
+(defproject net.danielcompton/defn-spec-alpha "0.1.1-SNAPSHOT"
   :description "Create specs for your functions inline with your defn's"
   :url "https://github.com/danielcompton/defn-spec"
   :license {:name "Eclipse Public License"
