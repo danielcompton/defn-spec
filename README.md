@@ -91,9 +91,9 @@ Like all things in life, defn-spec has benefits and tradeoffs:
 
 This library is currently in alpha preview and is soliciting feedback on functionality and syntax from interested parties before publishing an official release. In the meantime, you can use a SNAPSHOT build at `[TODO]`.
 
-defn-spec follows clojure.spec.alpha. When `clojure.spec.alpha2` is released, the plan is to publish a new artifact ID and set of `alpha2` namespaces, so you can use both versions side-by-side.
+defn-spec-alpha follows clojure.spec.alpha. When clojure.spec-alpha2 is released, the plan is to publish a new artifact ID and set of `defn-spec-alpha2` namespaces, so you can use both versions side-by-side as you migrate to spec-alpha2.
 
-Long-term I would like `defn-spec` to be so stable that it is safe to include as a library dependency. While I strongly want to keep source compatibility, I can't guarantee this in the short-term. Until this warning is removed I would recommend only using this in applications or libraries where you control the consumers. There have also been rumblings that eventually there may be something similar to this built into Clojure's core defn macro.
+Long-term I would like `defn-spec` to be so stable that it is safe to include as a library dependency. While I strongly want to keep source compatibility, I can't guarantee this in the short-term. Until this warning is removed I would recommend only using this in applications or libraries where you control all of the consumers. There have also been rumblings that eventually there may be something similar to this built into Clojure's core defn macro.
 
 ## Cursive integration
 
