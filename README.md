@@ -78,12 +78,14 @@ The API is very minimal, there is just a single `defn` macro in the public API.
 
 ## Motivation
 
-I've been using Clojure spec for a while, but I found that I often resisted writing specs for functions. This was mostly because I didn't want to have to duplicate a bunch of information into the `fdef`. It's not a huge deal, but in my experience it was enough to deter me from writing specs while I was heavily working on an area of code. I created defn-spec to increase the locality of the spec definitions, and to reduce the activation energy to start adding specs to your codebase.
+I've been using Clojure spec for a while, but I found that I often resisted writing specs for functions. This was mostly because I didn't want to have to duplicate a bunch of information into the `fdef`. It's not a huge deal, but in my experience it was enough to deter me from writing specs while I was heavily working on an area of code. 
+
+I created defn-spec to increase the locality of the spec definitions, and to reduce the activation energy to start adding specs to your codebase. I wanted to make something that was small enough to drop into any project or library I worked on.
 
 ## Alternatives
 
-* Orchestra has a [defn-spec](https://github.com/jeaye/orchestra#defn-spec) macro. The net.danielcompton defn-spec allows for optionally only speccing part of the function, and matches the well-known Schema defn syntax.
-* [Ghostwheel](https://github.com/gnl/ghostwheel) has a defn macro. It also introduces a new way of describing specs. This project tries to not introduce any extra concepts for defining specs, apart from the ability to add spec hints to arguments.
+* Orchestra has a [defn-spec](https://github.com/jeaye/orchestra#defn-spec) macro. Cursive doesn't yet have support for this macro though, and it requires you to provide specs for every function argument. Orchestra is great though, and I recommend everyone check it out, especially for instrumenting their `:ret` and `:fn` specs.
+* [Ghostwheel](https://github.com/gnl/ghostwheel) has a defn macro. It also introduces a new way of describing specs, along with many other useful features.
 * [Provisdom/defn-spec](https://github.com/Provisdom/defn-spec) is more focused on instrumenting functions. It does allow inline definitions of specs, though the syntax is much the same as in an `fdef`.
 
 Try them all out though, and see which one works best for you.
