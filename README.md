@@ -36,6 +36,23 @@ Instead of writing your `fdef` separately from your `defn`:
         :ret ::zoned-date-time)
 ```
 
+## Installation
+
+Add the defn-spec-alpha dependency to your project's dependencies. Don't add it to your development dependencies unless you are only speccing development time functions.
+
+**Leiningen/Boot**
+
+`[net.danielcompton/defn-spec-alpha "0.1.0"]`
+
+**deps.edn**
+
+```clojure
+{:deps
+ {net.danielcompton/defn-spec-alpha {:mvn/version "0.1.0"}}}
+```
+
+Note that clojure.spec is required to use defn-spec. This requires Clojure 1.9.0 or greater.
+
 ## Usage
 
 The basic syntax is the same as `clojure.core/defn`, but you can optionally add 'spec hints' with `:-` to any of the arguments and the return value. Any valid spec can be used, e.g. functions, sets, registered spec identifiers.
