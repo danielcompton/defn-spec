@@ -1,6 +1,6 @@
 # defn-spec
 
-[![CircleCI](https://circleci.com/gh/danielcompton/defn-spec.svg?style=svg)](https://circleci.com/gh/danielcompton/defn-spec)
+[![CircleCI](https://circleci.com/gh/danielcompton/defn-spec.svg?style=svg)](https://circleci.com/gh/danielcompton/defn-spec) [![Clojars Project](https://img.shields.io/clojars/v/net.danielcompton/defn-spec-alpha.svg)](https://clojars.org/net.danielcompton/defn-spec-alpha)
 
 defn-spec lets you create Clojure Specs inline with your `defn`. The syntax (and implementation) has been borrowed from [Schema](https://github.com/plumatic/schema), so if you've used that before, this should be very familiar.
 
@@ -81,6 +81,8 @@ The API is very minimal, there is just a single `defn` macro in the public API.
 I've been using Clojure spec for a while, but I found that I often resisted writing specs for functions. This was mostly because I didn't want to have to duplicate a bunch of information into the `fdef`. It's not a huge deal, but in my experience it was enough to deter me from writing specs while I was heavily working on an area of code. 
 
 I created defn-spec to increase the locality of the spec definitions, and to reduce the activation energy to start adding specs to your codebase. I wanted to make something that was small enough to drop into any project or library I worked on.
+
+defn-spec doesn't introduce any concepts or features to spec. The only deviation from vanilla spec is that defn-spec will automatically build the `s/cat` form for you from the arguments that you provide.
 
 ## Alternatives
 
