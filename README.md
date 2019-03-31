@@ -66,6 +66,14 @@ The basic syntax is the same as `clojure.core/defn`, but you can optionally add 
    )
 ```
 
+## Limitations
+
+* Multiple arity functions are not yet supported. [#2](https://github.com/danielcompton/defn-spec/issues/2)
+* `& rest`, `& [a b]`, and `:keys` destructuring are not yet supported. [#3](https://github.com/danielcompton/defn-spec/issues/3), [#4](https://github.com/danielcompton/defn-spec/issues/3), [#10](https://github.com/danielcompton/defn-spec/issues/10)
+* `:fn` specs are not supported yet, as I'm not sure where to put the `:fn` spec yet. [#6](https://github.com/danielcompton/defn-spec/issues/6)
+* ClojureScript is not supported yet. [#7](https://github.com/danielcompton/defn-spec/issues/7)
+* Using an attr-map after the function definition is not supported. I've never seen this used in the wild, and didn't even know this was a thing until investigating the `defn` macro.
+
 ## Motivation
 
 I've been using Clojure spec for a while, but I found that I often resisted writing specs for functions. This was mostly because I didn't want to have to duplicate a bunch of information into the `fdef`. It's not a huge deal, but in my experience it was enough to deter me from writing specs while I was heavily working on an area of code. I created defn-spec to increase the locality of the spec definitions, and to reduce the activation energy to start adding specs to your codebase.
@@ -95,14 +103,6 @@ Like all things in life, defn-spec has benefits and tradeoffs:
 * If you use the `ds/defn` macro, but don't define any 'spec hints' for the arguments or return value then no `fdef` spec is defined.
 * When expanding the `ds/defn` macro, the `fdef` is defined immediately after the `clojure.core/defn`. If you declare fdefs after this point, they will overwrite the defn-spec `fdef`. You cannot merge 'spec hints' defined on a function and other spec definitions in a standalone `fdef`.
 * Unlike schema, defn-spec doesn't control when/if function specs are checked. I recommend using [orchestra](https://github.com/jeaye/orchestra) in development to instrument the `:args`, `:fn`, and `:ret` specs for your `fdef`'s.
-
-## Limitations
-
-* Multiple arity functions are not yet supported. [#2](https://github.com/danielcompton/defn-spec/issues/2)
-* `& rest`, `& [a b]`, and `:keys` destructuring are not yet supported. [#3](https://github.com/danielcompton/defn-spec/issues/3), [#4](https://github.com/danielcompton/defn-spec/issues/3), [#10](https://github.com/danielcompton/defn-spec/issues/10)
-* `:fn` specs are not supported yet, as I'm not sure where to put the `:fn` spec yet. [#6](https://github.com/danielcompton/defn-spec/issues/6)
-* ClojureScript is not supported yet. [#7](https://github.com/danielcompton/defn-spec/issues/7)
-* Using an attr-map after the function definition is not supported. I've never seen this used in the wild, and didn't even know this was a thing until investigating the `defn` macro.
 
 ## Stability
 
