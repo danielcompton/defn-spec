@@ -1,0 +1,4 @@
+{:lint-as {
+           net.danielcompton.defn-spec-alpha/defn schema.core/defn
+           ; net.danielcompton.defn-spec-alpha/defn clojure.core/defn
+           }}
