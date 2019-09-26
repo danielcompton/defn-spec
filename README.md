@@ -68,6 +68,18 @@ The basic syntax is the same as `clojure.core/defn`, but you can optionally add 
 
 The API is very minimal, there is just a single `defn` macro in the public API.
 
+## Cursive integration
+
+You can tell Cursive to [resolve](https://cursive-ide.com/userguide/macros.html) defn-spec's `defn` macro like the schema `defn` macro. See the [Cursive setup](doc/cursive.md) page for full details on how to do this.
+
+## clj-kondo integration
+
+You can tell Cursive to [resolve](https://cljdoc.org/d/clj-kondo/clj-kondo/CURRENT/doc/configuration#lint-a-custom-macro-like-a-built-in-macro) defn-spec's `defn` macro like the schema `defn` macro. Add the following to your `.clj-kondo/config.edn` file:
+
+```
+{:lint-as {net.danielcompton.defn-spec-alpha/defn schema.core/defn}}
+```
+
 ## Limitations
 
 * Multiple arity functions are not yet supported. [#2](https://github.com/danielcompton/defn-spec/issues/2)
@@ -123,10 +135,6 @@ This library is currently in alpha preview and is soliciting feedback on functio
 defn-spec-alpha follows clojure.spec.alpha. When clojure.spec-alpha2 is released, the plan is to publish a new artifact ID and set of `defn-spec-alpha2` namespaces, so you can use both versions side-by-side as you migrate to spec-alpha2.
 
 Long-term I would like `defn-spec` to be so stable that it is safe to include as a library dependency. There is only a single macro in this library to minimise the risk consumers are taking on. While I strongly want to keep source compatibility, I can't guarantee this in the short-term. Until this warning is removed I would recommend only using this in applications or libraries where you control all of the consumers. There have also been rumblings that eventually there may be something similar to this built into Clojure's core defn macro.
-
-## Cursive integration
-
-You can tell Cursive to [resolve](https://cursive-ide.com/userguide/macros.html) defn-spec's `defn` macro like the schema `defn` macro. See the [Cursive setup](doc/cursive.md) page for full details on how to do this.
 
 ## License
 
