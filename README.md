@@ -74,7 +74,7 @@ You can tell Cursive to [resolve](https://cursive-ide.com/userguide/macros.html)
 
 ## clj-kondo integration
 
-You can tell Cursive to [resolve](https://cljdoc.org/d/clj-kondo/clj-kondo/CURRENT/doc/configuration#lint-a-custom-macro-like-a-built-in-macro) defn-spec's `defn` macro like the schema `defn` macro. Add the following to your `.clj-kondo/config.edn` file:
+You can tell clj-kondo to [resolve](https://cljdoc.org/d/clj-kondo/clj-kondo/CURRENT/doc/configuration#lint-a-custom-macro-like-a-built-in-macro) defn-spec's `defn` macro like the schema `defn` macro. Add the following to your `.clj-kondo/config.edn` file:
 
 ```
 {:lint-as {net.danielcompton.defn-spec-alpha/defn schema.core/defn}}
