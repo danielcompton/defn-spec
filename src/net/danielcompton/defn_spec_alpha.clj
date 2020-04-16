@@ -1,6 +1,7 @@
 (ns net.danielcompton.defn-spec-alpha
   (:refer-clojure :exclude [defn])
   (:require [clojure.spec.alpha :as s]
+            [net.danielcompton.defn-spec-alpha.spec :as spec]
             [net.danielcompton.defn-spec-alpha.macros :as macros]))
 
 (defmacro defn
@@ -29,33 +30,24 @@
       - & {} is not supported.
     - Unlike clojure.core/defn, a final attr-map on multi-arity functions
       is not supported."
-  {:arglists '([name ret-spec? doc-string? attr-map? [params*] prepost-map? body])}
-  [& defn-args]
-  (let [[name & more-defn-args] (macros/normalized-defn-args &env defn-args)
-        {:keys [doc tag] :as standard-meta} (meta name)
-        {:keys [outer-bindings schema-form fn-body arglists raw-arglists
-                processed-arities]} (macros/process-fn- &env name more-defn-args)]
-    `(let ~outer-bindings
-       (let [ret# (clojure.core/defn ~(with-meta name {})
-                    ~(assoc (apply dissoc standard-meta (when (macros/primitive-sym? tag) [:tag]))
-                       :doc (str
-                              (str "Inputs: " (if (= 1 (count raw-arglists))
-                                                (first raw-arglists)
-                                                (apply list raw-arglists)))
-                              (when-let [ret (when (= (second defn-args) :-) (nth defn-args 2))]
-                                (str "\n  Returns: " ret))
-                              (when doc (str "\n\n  " doc)))
-                       :raw-arglists (list 'quote raw-arglists)
-                       :arglists (list 'quote arglists)
-                       ;; TODO: remove this
-                       :spec schema-form)
-                    ~@fn-body)]
-         ;; Only define an fdef if there are specs for the args or return value.
-         (when (or ~(:spec? (meta name))
-                   ~(some true? (map #(:spec? (meta %)) (first arglists))))
-           (s/fdef ~(with-meta name {})
-                   :ret ~(:spec (meta name))
-                   :args (s/cat ~@(mapcat
-                                    #(list (keyword %) (:spec (meta %)))
-                                    (first arglists)))))
-         ret#))))
+  [& args]
+  (let [ast (s/conform ::spec/annotated-defn-args args)
+        defn-form (->> ast
+                       (spec/annotated-defn->defn)
+                       (s/unform ::spec/defn-args))
+        arg-spec (macros/combine-arg-specs ast)
+        ret-spec (get-in ast [:ret-annotation :spec])
+        fn-name (:fn-name ast)]
+    `(do
+       (clojure.core/defn ~@defn-form)
+       ~(cond (and arg-spec ret-spec)
+              `(clojure.spec.alpha/fdef ~fn-name
+                 :args ~arg-spec
+                 :ret ~ret-spec)
+              arg-spec
+              `(clojure.spec.alpha/fdef ~fn-name
+                 :args ~arg-spec)
+              ret-spec
+              `(clojure.spec.alpha/fdef ~fn-name
+                 :ret ~ret-spec)
+              :else nil))))
