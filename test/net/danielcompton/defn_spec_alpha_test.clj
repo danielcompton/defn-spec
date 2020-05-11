@@ -62,14 +62,18 @@
 
 (deftest arg-1-test
   (is (= 5 (arg-1-fn 5)))
-  (is (thrown? ExceptionInfo (arg-1-fn :x))))
+  (is (thrown? ExceptionInfo (arg-1-fn :x)))
+  (is (= '(fspec :args (cat :x int?) :ret any? :fn nil)
+         (maybe-describe `arg-1-fn))))
 
 (ds/defn arg-1-spec [x :- ::int]
   x)
 
 (deftest arg-1-spec-test
   (is (= 5 (arg-1-spec 5)))
-  (is (thrown? ExceptionInfo (arg-1-spec :x))))
+  (is (thrown? ExceptionInfo (arg-1-spec :x)))
+  (is (= '(fspec :args (cat :x ::int) :ret any? :fn nil)
+         (maybe-describe `arg-1-spec))))
 
 (ds/defn arg-2 [x :- int? y]
   [x y])
@@ -77,39 +81,42 @@
 (deftest arg-2-test
   (is (= [1 2] (arg-2 1 2)))
   (is (= [1 :x] (arg-2 1 :x)))
-  (is (thrown? ExceptionInfo (arg-2 :x :y))))
+  (is (thrown? ExceptionInfo (arg-2 :x :y)))
+  (is (= '(fspec :args (cat :x int? :y any?) :ret any? :fn nil)
+         (maybe-describe `arg-2))))
 
 (ds/defn ret :- int? [x] x)
 
 (deftest ret-test
   (is (= 5 (ret 5)))
-  (is (thrown? ExceptionInfo (ret :x))))
+  (is (thrown? ExceptionInfo (ret :x)))
+  (is (= '(fspec :args nil :ret int? :fn nil)
+         (maybe-describe `ret))))
 
 (ds/defn ret-spec :- ::int [x] x)
 
 (deftest ret-spec-test
   (is (= 5 (ret-spec 5)))
-  (is (thrown? ExceptionInfo (ret-spec :x))))
+  (is (thrown? ExceptionInfo (ret-spec :x)))
+  (is (= '(fspec :args nil :ret ::int :fn nil)
+         (maybe-describe `ret-spec))))
 
 (ds/defn args-ret :- int? [x :- ::int]
   x)
 
-(ds/defn args-ret-broken :- int? [x :- ::int]
-  :x)
-
 (deftest args-ret-test
   (is (= 5 (args-ret 5)))
-  (is (thrown? ExceptionInfo (args-ret-broken 5))))
+  (is (= '(fspec :args (cat :x ::int) :ret int? :fn nil)
+         (maybe-describe `args-ret))))
 
-(deftest spec-forms-test
-  (is (= (maybe-describe `args-ret)
-         '(fspec :args (cat :x ::int) :ret int? :fn nil)))
+(ds/defn args-ret-broken :- int?
+  ;; Same as args-ret but will always fail.
+  [x :- ::int]
+  :x)
 
-  (is (= (maybe-describe `ret-spec)
-         '(fspec :args nil :ret ::int :fn nil)))
-
-  (is (= (maybe-describe `arg-2)
-         '(fspec :args (cat :x int? :y any?) :ret any? :fn nil))))
+(deftest args-ret-broken-test
+  (is (thrown? ExceptionInfo
+               (args-ret-broken 5))))
 
 (ds/defn multi-arity
   ([]
@@ -123,14 +130,17 @@
 
 (ds/defn multi-arity-spec :- int?
   ([] 0)
-  ([x :- ::int] 1))
+  ([x :- ::int] 1)
+  ([x :- ::int y :- ::int] 2))
 
 (deftest multi-arity-test
   (testing "works with no specs"
     (is (= 0 (multi-arity)))
     (is (= 1 (multi-arity nil)))
     (is (= 2 (multi-arity nil nil)))
-    (is (= 3 (multi-arity nil nil nil))))
+    (is (= 3 (multi-arity nil nil nil)))
+    ;; TODO: multi-arity shouldn't define a spec
+    #_(is (nil? (maybe-describe `multi-arity))))
 
   (testing "works with specs"
     (is (= (multi-arity-spec) 0))
@@ -156,6 +166,51 @@
    x)
   ([x y z & rest]
    [x y z rest]))
+
+(ds/defn rest-destructuring-spec [head :- int? & tail]
+  [head tail])
+
+(ds/defn rest-destructuring-with-rest-spec [head :- int? & tail :- int?]
+  [head tail])
+
+(ds/defn multi-arity-rest :- int?
+  ([] 0)
+  ([x :- ::int] 1)
+  ([x :- ::int & [b]] b))
+
+(deftest rest-destructuring-test
+  (testing "works without specs"
+    (is (= [1] (rest-destructuring-1 1)))
+    (is (= [1 [2]] (rest-destructuring-2 1 2)))
+    (is (= [1 [2 3]] (rest-destructuring-2 1 2 3))))
+
+  (is (= [1 [2 3]]
+         (rest-destructuring-spec 1 2 3)))
+  (is (= '(fspec :args (cat :head int?
+                            ;; TODO: name the arg :tail
+                            :vararg (* any?))
+                 ;; TODO: ret any or ret nil? if no spec provided?
+                 :ret any?
+                 :fn nil)
+         (maybe-describe `rest-destructuring-spec)))
+
+  ;; TODO: spec the rest argument
+  #_(testing "speccing rest argument"
+    (is (= [1 [2 3]] (rest-destructuring-with-rest-spec 1 2 3)))
+    (is (= '(fspec :args (cat :head int?
+                              :vararg (+ int?))
+                   :ret any?
+                   :fn nil)
+           (maybe-describe `rest-destructuring-spec))))
+
+  (testing "works with multi-arity rest arguments"
+    (is (= '(fspec :args (or :arity-1 (cat)
+                             :arity-2 (cat :x ::int)
+                             :arity-3 (cat :x ::int :varargs (* any?)))
+                   :ret int?
+                   :fn nil)
+           (maybe-describe `multi-arity-rest)))))
+
 
 (ds/defn destructuring-list :- ::int
   [a :- ::int b :- int? & [c d]]
@@ -229,10 +284,10 @@
 
 (deftest partial-spec
   (testing "standard defn's don't register specs"
-    (is (nil? (s/get-spec `standard-defn))))
+    (is (nil? (maybe-describe `standard-defn))))
 
   (testing "if no spec hints are provided, no function spec is defined"
-    (is (nil? (s/get-spec `no-spec-ds-defn))))
+    (is (nil? (maybe-describe `no-spec-ds-defn))))
 
   (testing "if some spec hints are provided, a function spec is defined"
     (is (some? (maybe-describe `only-arg)))
