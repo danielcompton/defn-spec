@@ -12,11 +12,8 @@
                 (st/instrument)
                 (f)))
 
-(defn get-spec [p]
-  (get @@#'clojure.spec.alpha/registry-ref p))
-
 (defn maybe-describe [p]
-  (some-> p get-spec s/describe))
+  (some-> p s/get-spec s/describe))
 
 (s/def ::int int?)
 
@@ -225,16 +222,16 @@
 
 (deftest partial-spec
   (testing "standard defn's don't register specs"
-    (is (nil? (get-spec `standard-defn))))
+    (is (nil? (s/get-spec `standard-defn))))
 
   (testing "if no spec hints are provided, no function spec is defined"
-    (is (nil? (get-spec `no-spec-ds-defn))))
+    (is (nil? (s/get-spec `no-spec-ds-defn))))
 
   (testing "if some spec hints are provided, a function spec is defined"
-    (is (some? (get-spec `only-arg)))
-    (is (some? (get-spec `several-args-1-specced)))
-    (is (some? (get-spec `only-ret)))))
+    (is (some? (maybe-describe `only-arg)))
+    (is (some? (maybe-describe `several-args-1-specced)))
+    (is (some? (maybe-describe `only-ret)))))
 
 (comment
-  (s/describe (get @@#'clojure.spec.alpha/registry-ref `arg-1-spec)))
+  (maybe-describe `arg-1-spec))
 
