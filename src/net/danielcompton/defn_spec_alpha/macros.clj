@@ -140,6 +140,8 @@
     (:arg-keys keys-accumulator)))
 
 (defn arity-labels []
+  ;; TODO: arity-0
+  ;; Count number of arguments, and also handle varargs
   (map (fn [x] (keyword (str "arity-" x))) (iterate inc 1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

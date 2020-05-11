@@ -135,7 +135,14 @@
   (testing "works with specs"
     (is (= (multi-arity-spec) 0))
     (is (= (multi-arity-spec 5) 1))
-    (is (thrown? ExceptionInfo (multi-arity-spec :x)))))
+    (is (thrown? ExceptionInfo (multi-arity-spec :x)))
+    ;; TODO: arity names should start match number of arguments
+    (is (= '(fspec :args (or :arity-1 (cat)
+                             :arity-2 (cat :x ::int)
+                             :arity-3 (cat :x ::int :y ::int))
+                   :ret int?
+                   :fn nil)
+           (maybe-describe `multi-arity-spec)))))
 
 (ds/defn rest-destructuring-1
   [& rest]
