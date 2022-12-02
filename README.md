@@ -82,8 +82,7 @@ You can tell clj-kondo to [resolve](https://cljdoc.org/d/clj-kondo/clj-kondo/CUR
 
 ## Limitations
 
-* Multiple arity functions are not yet supported. [#2](https://github.com/danielcompton/defn-spec/issues/2)
-* `& rest`, `& [a b]`, and `:keys` destructuring are not yet supported. [#3](https://github.com/danielcompton/defn-spec/issues/3), [#4](https://github.com/danielcompton/defn-spec/issues/3), [#10](https://github.com/danielcompton/defn-spec/issues/10)
+* `& [a b]` destructuring is not supported. [#4](https://github.com/danielcompton/defn-spec/issues/4)
 * `:fn` specs are not supported yet, as I'm not sure where to put the `:fn` spec yet. [#6](https://github.com/danielcompton/defn-spec/issues/6)
 * ClojureScript is not supported yet. [#7](https://github.com/danielcompton/defn-spec/issues/7)
 * Using an attr-map after the function definition is not supported. Looking at defn's docstring: `(defn name doc-string? attr-map? ([params*] prepost-map? body) + attr-map?)` it is the final `+ attr-map?` that isn't supported. I've never seen this used in the wild, and didn't even know this was a thing until investigating the `defn` macro.
